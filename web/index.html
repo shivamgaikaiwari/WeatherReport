@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weather Report · Shivam Gaikaiwari</title>
+  <meta name="description" content="Search any city for current conditions and a 7-day forecast. Web version of an Android app built with Kotlin, Jetpack Compose and MVVM.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='7' fill='%23e3a23b'/%3E%3Cpath d='M10 26a6 6 0 0 1 0-12 8 8 0 0 1 15 3 4.5 4.5 0 0 1 0 9z' fill='%235b8fc9'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site">
+    <a class="home" href="https://shivamgaikaiwari.github.io/">Shivam Gaikaiwari</a>
+    <nav aria-label="Project links">
+      <a href="#about">About the app</a>
+      <a href="https://github.com/shivamgaikaiwari/WeatherReport">Source code</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="sky" aria-labelledby="app-title">
+      <div class="wrap">
+        <h1 id="app-title">Weather Report</h1>
+        <p class="lede">Search any city for current conditions and the week ahead.</p>
+
+        <form class="search" id="search" role="search">
+          <label class="sr-only" for="q">City name</label>
+          <input id="q" name="q" type="search" placeholder="Enter a city, e.g. London" autocomplete="off" spellcheck="false">
+          <button type="submit">Search</button>
+        </form>
+        <div class="suggest" id="suggest" aria-label="Try a city">
+          <button type="button" data-city="London">London</button>
+          <button type="button" data-city="Tokyo">Tokyo</button>
+          <button type="button" data-city="Reykjavik">Reykjavik</button>
+          <button type="button" data-city="Phoenix">Phoenix</button>
+        </div>
+
+        <div class="result" id="result" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="about" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <h2 id="about-title">About this project</h2>
+        <p>Weather Report started as a native Android app written in <strong>Kotlin</strong> with <strong>Jetpack Compose</strong>. This page is a browser port of it, so you can try it without installing anything. Both versions call the free <a href="https://open-meteo.com/">Open-Meteo</a> API: a geocoding lookup turns the city name into coordinates, then a forecast request returns current conditions and seven days of highs and lows.</p>
+
+        <div class="cta">
+          <a class="button" href="https://github.com/shivamgaikaiwari/WeatherReport">View the Kotlin source</a>
+          <a class="button quiet" href="https://github.com/shivamgaikaiwari/WeatherReport/releases/latest/download/weather-report.apk">Download the Android app (APK)</a>
+        </div>
+
+        <h3>Architecture</h3>
+        <p>The Android app uses MVVM with one-way data flow. The web version keeps the same layers, one file each, so the two are easy to compare.</p>
+        <ol class="flow">
+          <li><span class="layer">View</span><span class="what">Compose <code>WeatherScreen</code> renders whatever state it is given and sends search events up.</span><span class="web">web: <code>app.js</code></span></li>
+          <li><span class="layer">ViewModel</span><span class="what"><code>WeatherViewModel</code> holds the query and a <code>StateFlow</code> of <code>Idle</code>, <code>Loading</code>, <code>Success</code> or <code>Error</code>, cancels stale searches, and turns exceptions into readable messages.</span><span class="web">web: <code>viewmodel.js</code></span></li>
+          <li><span class="layer">Repository</span><span class="what"><code>WeatherRepositoryImpl</code> chains the geocoding and forecast calls through Retrofit and returns a <code>Result</code>.</span><span class="web">web: <code>repository.js</code></span></li>
+          <li><span class="layer">Mapper</span><span class="what"><code>WeatherMapper</code> converts Gson DTOs into domain models; <code>WeatherCodeMapper</code> turns WMO weather codes into text and icons.</span><span class="web">web: <code>mapper.js</code></span></li>
+        </ol>
+        <p class="note">Dependencies are wired by hand in <code>AppContainer</code>, which keeps the ViewModel testable with a fake repository and no DI framework.</p>
+
+        <h3>Tests</h3>
+        <ul class="tests">
+          <li><code>JsonParsingTest</code> parses real-shaped geocoding and forecast fixtures with Gson.</li>
+          <li><code>WeatherMapperTest</code> covers DTO-to-domain mapping and malformed data.</li>
+          <li><code>WeatherCodeMapperTest</code> checks every WMO code group.</li>
+          <li><code>WeatherRepositoryImplTest</code> runs Retrofit end to end against MockWebServer: success, city not found, HTTP 500 and bad JSON.</li>
+          <li><code>WeatherViewModelTest</code> verifies state transitions and error messages with a test dispatcher.</li>
+        </ul>
+        <p class="note">The web port has its own tests for the mapper and ViewModel, run with Node's built-in test runner.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      Built by <a href="https://github.com/shivamgaikaiwari">Shivam Gaikaiwari</a>. Weather data from <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0).
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

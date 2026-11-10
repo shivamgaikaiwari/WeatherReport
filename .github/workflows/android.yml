@@ -1,0 +1,49 @@
+name: Android (tests + APK)
+
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", "gradle/**", "*.gradle.kts", "gradle.properties", ".github/workflows/android.yml"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Unit tests
+        run: gradle testDebugUnitTest --no-daemon
+
+      - name: Build APK
+        run: |
+          gradle assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk weather-report.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weather-report-apk
+          path: weather-report.apk
+
+      # On main, publish the APK as a release so the site's download link
+      # (releases/latest/download/weather-report.apk) always points at the newest build.
+      - name: Publish release
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Weather Report (build ${{ github.run_number }})
+          body: Debug-signed APK built from ${{ github.sha }}. Android 8.0 (API 26) or newer; you may need to allow installs from unknown sources.
+          files: weather-report.apk
+          make_latest: true

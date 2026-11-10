@@ -2,6 +2,12 @@
 
 Search any city and see current conditions plus a 7-day forecast.
 
+**Try it in your browser:** https://shivamgaikaiwari.github.io/WeatherReport/
+**Android APK:** [download the latest build](https://github.com/shivamgaikaiwari/WeatherReport/releases/latest/download/weather-report.apk)
+
+## Web version (`web/`)
+A browser port of the app with the same layers, one file each: `mapper.js` (WeatherMapper + WeatherCodeMapper), `repository.js` (Retrofit APIs + repository), `viewmodel.js` (WeatherViewModel with Idle/Loading/Success/Error) and `app.js` (the screen). Plain ES modules, no build step. Tests: `node --test web/test/*.test.js`. GitHub Actions runs them and publishes `web/` to GitHub Pages on every push to `main`; another workflow runs the Android unit tests and attaches a fresh APK to a release.
+
 ## Weather API
 [Open-Meteo](https://open-meteo.com/) — free, **no API key needed**.
 1. Geocoding: `https://geocoding-api.open-meteo.com/v1/search?name=London` → lat/lon
